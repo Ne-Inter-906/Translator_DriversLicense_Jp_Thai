@@ -1,0 +1,10 @@
+# Pythonキャッシュ
+__pycache__/
+*.py[cod]
+
+# データファイル（サンプルだけ上げて、実行結果は上げないようにする）
+data/output.xlsx
+
+# 仮想環境
+venv/
+.env
