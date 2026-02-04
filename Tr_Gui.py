@@ -1,5 +1,7 @@
 import customtkinter as ctk
 import Tr_Main as tm
+import traceback # エラー詳細取得用
+from tkinter import messagebox # ポップアップ通知用
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -58,9 +60,18 @@ class App(ctk.CTk):
             return
 
         print(f"--- 実行: {mode} (Target: {targets}, Limit: {limit}) ---")
-        
+        # ボタンを無効化（連打防止）
+        self.start_button.configure(state="disabled", text="実行中...")
         # main関数を呼び出し（targets引数を追加）
-        tm.main(mode=mode, limit=limit, targets=targets)
+        try:
+            tm.main(mode=mode, limit=limit, targets=targets)
+        except Exception as e:
+            error_msg = traceback.format_exc()
+            print(f"エラーが発生しました：\n{error_msg}")
+            messagebox.showerror("エラー", f"実行中にエラーが発生しました：\n\n{str(e)}")
+        finally:
+            #ボタン最有効化
+            self.start_button.configure(state="normal", text="実行開始")
 
 
 if __name__ == "__main__":
