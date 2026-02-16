@@ -1,4 +1,4 @@
-# AutoTranslate
+# Translator_DriversLicense_Jp_Thai
 
 ## 概要
    日本の運転免許筆記試験の練習問題や模擬試験を外国語（現在はタイ語のみ）
@@ -41,7 +41,7 @@
    AI(METAのNLLB)で日本語からタイ語へ翻訳を行います
    翻訳したいデータを以下の構成で配置してください。
 
-      配置先: AutoTranslate/data/input.xlsx
+      配置先: data/input.xlsx
 
       構成: templates/Driver'sLicense_MockTest.xlsx と同じセル構成にしてください。
 
