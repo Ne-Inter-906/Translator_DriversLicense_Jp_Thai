@@ -10,12 +10,15 @@ class SimilarityChecker:
         self.model = SentenceTransformer(model_name)
         self.threshold = 0.75
     
-    def check_file(self, file_path, target_columns):
+    def check_file(self, file_path, target_columns, threshold=None):
         if not os.path.exists(file_path):
             print(f"ファイルが見つかりません: {file_path}")
             return
 
-        print(f"チェック開始: {file_path}")
+        if threshold is not None:
+            self.threshold = float(threshold)
+
+        print(f"チェック開始: {file_path} (閾値: {self.threshold})")
 
         wb = load_workbook(file_path)
         ws = wb.worksheets[0] 

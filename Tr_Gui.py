@@ -19,6 +19,8 @@ TRANSLATIONS = {
         "chk_comment": "解説文 (Comment)",
         "limit_label": "【4】行数制限 (空なら全件)",
         "limit_placeholder": "例: 16",
+        "threshold_label": "【3】判定しきい値 (0.0 - 1.0)",
+        "threshold_placeholder": "例: 0.75 (デフォルト)",
         "start_btn": "実行開始",
         "running": "実行中...",
         "msg_error_file": "翻訳モードを実行するには、入力ファイルを選択してください。",
@@ -38,6 +40,8 @@ TRANSLATIONS = {
         "chk_comment": "คำอธิบาย (Comment)",
         "limit_label": "【4】จำกัดจำนวนบรรทัด (Limit)",
         "limit_placeholder": "ตัวอย่าง: 16",
+        "threshold_label": "【3】เกณฑ์ความเหมือน (Threshold 0.0 - 1.0)",
+        "threshold_placeholder": "ตัวอย่าง: 0.75",
         "start_btn": "เริ่มทำงาน (Start)",
         "running": "กำลังทำงาน... (Running)",
         "msg_error_file": "กรุณาเลือกไฟล์นำเข้าเพื่อเริ่มโหมดการแปล",
@@ -57,6 +61,8 @@ TRANSLATIONS = {
         "chk_comment": "Comment",
         "limit_label": "[4] Limit Rows (Empty for all)",
         "limit_placeholder": "Example: 16",
+        "threshold_label": "[3] Similarity Threshold (0.0 - 1.0)",
+        "threshold_placeholder": "Example: 0.75",
         "start_btn": "Start Execution",
         "running": "Running...",
         "msg_error_file": "Please select an input file to run translation mode.",
@@ -101,7 +107,7 @@ class App(ctk.CTk):
         self.mode_label = ctk.CTkLabel(self, text="", font=("HGｺﾞｼｯｸE", 16))
         self.mode_label.pack(pady=(20, 5))
         
-        self.mode_option = ctk.CTkOptionMenu(self, values=["all", "translate", "layout", "check"])
+        self.mode_option = ctk.CTkOptionMenu(self, values=["all", "translate", "layout", "check"], command=self.on_mode_change)
         self.mode_option.pack(pady=10)
 
         # 3. 翻訳対象の選択（チェックボックス）
@@ -122,6 +128,15 @@ class App(ctk.CTk):
         self.limit_entry = ctk.CTkEntry(self, placeholder_text="")
         self.limit_entry.pack(pady=5)
 
+        # 4.5 閾値設定 (Check mode only)
+        self.threshold_label = ctk.CTkLabel(self, text="", font=("HGｺﾞｼｯｸE", 14))
+        # packはon_mode_changeで行う
+        # 0.60 から 0.95 まで 0.05 刻みのリストを作成
+        threshold_values = [f"{x:.2f}" for x in [0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95]]
+        self.threshold_option = ctk.CTkOptionMenu(self, values=threshold_values)
+        self.threshold_option.set("0.75") # デフォルト値
+        # packはon_mode_changeで行う
+
         # 5. 実行ボタン
         self.start_button = ctk.CTkButton(self, text="", 
                                          fg_color="green", hover_color="darkgreen",
@@ -130,6 +145,9 @@ class App(ctk.CTk):
 
         # 初期表示の言語適用
         self.update_ui_text()
+        
+        # 初期表示のモードに合わせてUIを整理
+        self.on_mode_change(self.mode_option.get())
 
     def change_language(self, choice):
         """言語選択が変更されたときに呼ばれる"""
@@ -149,10 +167,39 @@ class App(ctk.CTk):
         self.check_comment.configure(text=t["chk_comment"])
         self.limit_label.configure(text=t["limit_label"])
         self.limit_entry.configure(placeholder_text=t["limit_placeholder"])
+        self.threshold_label.configure(text=t["threshold_label"])
         
         # 実行中でなければボタンのテキストも更新
         if self.start_button.cget("state") != "disabled":
             self.start_button.configure(text=t["start_btn"])
+
+    def on_mode_change(self, mode):
+        """モード変更時に不要なUI要素を隠す"""
+        # 一旦、可変部分とボタンを画面から外す（非表示にする）
+        self.target_label.pack_forget()
+        self.check_question.pack_forget()
+        self.check_comment.pack_forget()
+        self.limit_label.pack_forget()
+        self.limit_entry.pack_forget()
+        self.threshold_label.pack_forget()
+        self.threshold_option.pack_forget()
+        self.start_button.pack_forget()
+
+        # 翻訳が必要なモードの場合のみ、設定項目を再配置（表示）する
+        if mode in ["all", "translate"]:
+            self.target_label.pack(pady=(20, 5))
+            self.check_question.pack(pady=5)
+            self.check_comment.pack(pady=5)
+            self.limit_label.pack(pady=(20, 5))
+            self.limit_entry.pack(pady=5)
+        
+        # チェックモードの場合のみ、閾値設定を表示
+        elif mode == "check":
+            self.threshold_label.pack(pady=(20, 5))
+            self.threshold_option.pack(pady=5)
+
+        # ボタンは常に一番下に再配置
+        self.start_button.pack(pady=30)
 
     def select_file(self):
         """ファイル選択ダイアログを開き、選択されたパスをエントリーに入力する"""
@@ -169,6 +216,13 @@ class App(ctk.CTk):
         limit_str = self.limit_entry.get()
         limit = int(limit_str) if limit_str.isdigit() else None
         input_file = self.file_entry.get()
+        
+        # 閾値の取得（チェックモード用）
+        threshold_str = self.threshold_option.get()
+        try:
+            threshold_val = float(threshold_str) if threshold_str else 0.75
+        except ValueError:
+            threshold_val = 0.75 # エラー時はデフォルト
         
         # 現在の言語の辞書を取得
         t = TRANSLATIONS[self.current_lang]
@@ -212,7 +266,7 @@ class App(ctk.CTk):
                     }
                     
                     checker = SimilarityChecker()
-                    checker.check_file(target_file, columns)
+                    checker.check_file(target_file, columns, threshold=threshold_val)
                     self.after(0, lambda: messagebox.showinfo(t["done_title"], t["msg_check_done"].format(target_file.replace('.xlsx', '_checked.xlsx'))))
                 
                 else:
