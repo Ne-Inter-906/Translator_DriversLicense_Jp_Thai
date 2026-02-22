@@ -1,5 +1,15 @@
+# GUIライブラリ
+customtkinter
+
+# Excel操作
 pandas
 openpyxl
-torch
+
+# 翻訳 (NLLB) & AIモデル用
 transformers
+sentence-transformers
+torch
 sentencepiece
+
+# その他（計算・環境管理など）
+numpy
