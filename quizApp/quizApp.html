@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>運転免許 練習問題（正誤式）</title>
+  <meta name="theme-color" content="#5e43e9"/>
+
+  <!-- スタイル -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- スクリプト -->
+  <script src="questions.js" ></script>
+  <script src="quizApp.js" defer></script>
+</head>
+
+<body>
+  <header>
+    <h1>คำถามฝึกฝนใบอนุญาตขับขี่<br>運転免許 練習問題</h1>
+  </header>
+
+  <section id="intro" class="intro">
+    <p>คำถามฝึกหัดต่อไปนี้สร้างขึ้นโดยใช้การแปลอัตโนมัติของ NLLB ความถูกต้องของการแปลไม่รับประกัน<br>
+    <span style="font-size: small;">
+      この練習問題は NLLB の自動翻訳を用いて作成されています。翻訳精度は保証されません。
+    </span>        
+    </p>
+  </section>
+
+  <main>
+    <div id="result"></div>
+    <span id="qnum"></span>
+    <div id="image" style="text-align: center;"><img src=""></div>
+    <div id="Translated"></div>
+    <div id="question"></div>
+    <div id="exp_Translated"></div>
+    <div id="exp"></div>
+
+    <div id="start_btn_group">
+      <label for="amount">Choose the number of questions.</label>
+      <select id="amount">
+        <option value="90" selected>All</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+      </select>
+      <button id="start_btn">Start</button>
+    </div>
+    <div id="button-group">
+      <button id="trueBtn">True</button>
+      <button id="falseBtn">False</button>
+    </div>
+    <div id="next_btn_group">
+      <button id="next_btn">Next question</button>
+    </div>
+    <div id="quit_btn_group">
+      <button id="quit_btn">Quit / 中止</button>
+    </div>
+    <div id="backBtn_group">
+      <button id="backBtn">Back to title</button>
+    </div>
+  </main>
+
+  <footer>
+    <p style="text-align:center; font-size:0.8em; color:#888; margin-top:40px;">
+      Driver Quiz Practice
+    </p>
+  </footer>
+</body>
+</html>

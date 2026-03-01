@@ -10,10 +10,11 @@ ctk.set_default_color_theme("blue")
 # 言語リソース辞書
 TRANSLATIONS = {
     "Japanese": {
-        "file_label": "【1】翻訳するファイルを選択",
+        "file_label_translate": "【2】翻訳元ファイルを選択",
+        "file_label_quiz": "【2】アプリ作成元ファイルを選択",
         "file_placeholder": "ここにファイルパスが表示されます",
         "file_btn": "ファイル選択",
-        "mode_label": "【2】実行モード選択",
+        "mode_label": "【1】実行モード選択",
         "target_label": "【3】翻訳対象（翻訳モード時のみ）",
         "chk_question": "問題文 (Question)",
         "chk_comment": "解説文 (Comment)",
@@ -23,7 +24,7 @@ TRANSLATIONS = {
         "threshold_placeholder": "例: 0.75 (デフォルト)",
         "start_btn": "実行開始",
         "running": "実行中...",
-        "msg_error_file": "翻訳モードを実行するには、入力ファイルを選択してください。",
+        "msg_error_file": "実行するには、入力ファイルを選択してください。",
         "msg_error_target": "翻訳対象を少なくとも1つ選択してください",
         "msg_done": "処理が完了しました。",
         "msg_check_done": "チェックが完了しました！\n{}",
@@ -31,10 +32,11 @@ TRANSLATIONS = {
         "done_title": "完了"
     },
     "Thai": {
-        "file_label": "【1】เลือกไฟล์ที่จะแปล (Select File)",
+        "file_label_translate": "【2】เลือกไฟล์ต้นฉบับ (Select Source File)",
+        "file_label_quiz": "【2】เลือกไฟล์สำหรับแอป (Select Quiz File)",
         "file_placeholder": "ที่อยู่ไฟล์จะแสดงที่นี่",
         "file_btn": "เลือกไฟล์",
-        "mode_label": "【2】เลือกโหมด (Select Mode)",
+        "mode_label": "【1】เลือกโหมด (Select Mode)",
         "target_label": "【3】เป้าหมายการแปล (Target)",
         "chk_question": "คำถาม (Question)",
         "chk_comment": "คำอธิบาย (Comment)",
@@ -44,7 +46,7 @@ TRANSLATIONS = {
         "threshold_placeholder": "ตัวอย่าง: 0.75",
         "start_btn": "เริ่มทำงาน (Start)",
         "running": "กำลังทำงาน... (Running)",
-        "msg_error_file": "กรุณาเลือกไฟล์นำเข้าเพื่อเริ่มโหมดการแปล",
+        "msg_error_file": "กรุณาเลือกไฟล์นำเข้าเพื่อเริ่มทำงาน",
         "msg_error_target": "กรุณาเลือกเป้าหมายการแปลอย่างน้อย 1 รายการ",
         "msg_done": "การทำงานเสร็จสมบูรณ์",
         "msg_check_done": "การตรวจสอบเสร็จสมบูรณ์!\n{}",
@@ -52,10 +54,11 @@ TRANSLATIONS = {
         "done_title": "เสร็จสิ้น (Done)"
     },
     "English": {
-        "file_label": "[1] Select File to Translate",
+        "file_label_translate": "[2] Select Source File",
+        "file_label_quiz": "[2] Select Quiz Source File",
         "file_placeholder": "File path will appear here",
         "file_btn": "Select File",
-        "mode_label": "[2] Select Mode",
+        "mode_label": "[1] Select Mode",
         "target_label": "[3] Translation Target (Translate Mode Only)",
         "chk_question": "Question",
         "chk_comment": "Comment",
@@ -65,7 +68,7 @@ TRANSLATIONS = {
         "threshold_placeholder": "Example: 0.75",
         "start_btn": "Start Execution",
         "running": "Running...",
-        "msg_error_file": "Please select an input file to run translation mode.",
+        "msg_error_file": "Please select an input file to run.",
         "msg_error_target": "Please select at least one translation target.",
         "msg_done": "Process completed.",
         "msg_check_done": "Check completed!\n{}",
@@ -79,69 +82,70 @@ class App(ctk.CTk):
         super().__init__()
 
         self.title("Auto Translator GUI v1.1")
-        self.geometry("500x600")
+        self.geometry("500x650")
         self.current_lang = "English" # デフォルト言語
 
-        # 0. 言語選択 (UI display language)
-        self.lang_label = ctk.CTkLabel(self, text="UI display language", font=("Arial", 12, "bold"))
-        self.lang_label.pack(pady=(10, 0))
-        self.lang_option = ctk.CTkOptionMenu(self, values=["Japanese", "Thai", "English"], command=self.change_language)
-        self.lang_option.pack(pady=(0, 10))
+        # 0. 言語選択 (Top Right)
+        self.lang_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.lang_frame.pack(fill="x", padx=20, pady=(10, 0))
+        
+        self.lang_option = ctk.CTkOptionMenu(self.lang_frame, values=["Japanese", "Thai", "English"], command=self.change_language, width=100)
+        self.lang_option.pack(side="right")
         self.lang_option.set("English")
+        
+        self.lang_label = ctk.CTkLabel(self.lang_frame, text="Language:", font=("Arial", 12, "bold"))
+        self.lang_label.pack(side="right", padx=10)
 
-        # 1. 入力ファイル選択
-        self.file_label = ctk.CTkLabel(self, text="", font=("HGｺﾞｼｯｸE", 16))
-        self.file_label.pack(pady=(20, 5))
+        # Main Content Frame
+        self.content_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.content_frame.pack(fill="both", expand=True, padx=30, pady=10)
 
-        self.file_frame = ctk.CTkFrame(self)
-        self.file_frame.pack(fill="x", padx=20)
+        # 1. 実行モード選択 (Left Aligned)
+        self.mode_label = ctk.CTkLabel(self.content_frame, text="", font=("HGｺﾞｼｯｸE", 16, "bold"))
+        self.mode_label.pack(anchor="w", pady=(10, 5))
+        
+        self.mode_option = ctk.CTkOptionMenu(self.content_frame, values=["all", "translate", "layout", "check", "create_quiz"], command=self.on_mode_change, width=200)
+        self.mode_option.pack(anchor="w", pady=5)
+
+        # 2. 入力ファイル選択
+        self.file_label = ctk.CTkLabel(self.content_frame, text="", font=("HGｺﾞｼｯｸE", 16, "bold"))
+        # Packed in on_mode_change
+
+        self.file_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
+        # Packed in on_mode_change
 
         self.file_entry = ctk.CTkEntry(self.file_frame, placeholder_text="")
-        self.file_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        self.file_entry.pack(side="left", fill="x", expand=True, padx=(0, 10))
 
         self.file_button = ctk.CTkButton(self.file_frame, text="", width=100, command=self.select_file)
-        self.file_button.pack(side="left")
+        self.file_button.pack(side="right")
 
-
-        # 2. 実行モード選択
-        self.mode_label = ctk.CTkLabel(self, text="", font=("HGｺﾞｼｯｸE", 16))
-        self.mode_label.pack(pady=(20, 5))
+        # 3. 翻訳対象
+        self.target_label = ctk.CTkLabel(self.content_frame, text="", font=("HGｺﾞｼｯｸE", 14, "bold"))
         
-        self.mode_option = ctk.CTkOptionMenu(self, values=["all", "translate", "layout", "check"], command=self.on_mode_change)
-        self.mode_option.pack(pady=10)
-
-        # 3. 翻訳対象の選択（チェックボックス）
-        self.target_label = ctk.CTkLabel(self, text="", font=("HGｺﾞｼｯｸE", 14))
-        self.target_label.pack(pady=(20, 5))
-
-        self.check_question = ctk.CTkCheckBox(self, text="")
-        self.check_question.pack(pady=5)
+        self.check_question = ctk.CTkCheckBox(self.content_frame, text="")
         self.check_question.select() # デフォルトでチェック
 
-        self.check_comment = ctk.CTkCheckBox(self, text="")
-        self.check_comment.pack(pady=5)
+        self.check_comment = ctk.CTkCheckBox(self.content_frame, text="")
 
-        # 4. リミット設定
-        self.limit_label = ctk.CTkLabel(self, text="", font=("HGｺﾞｼｯｸE", 14))
-        self.limit_label.pack(pady=(20, 5))
+        # 4. Limit
+        self.limit_label = ctk.CTkLabel(self.content_frame, text="", font=("HGｺﾞｼｯｸE", 14, "bold"))
         
-        self.limit_entry = ctk.CTkEntry(self, placeholder_text="")
-        self.limit_entry.pack(pady=5)
+        self.limit_entry = ctk.CTkEntry(self.content_frame, placeholder_text="", width=200)
 
-        # 4.5 閾値設定 (Check mode only)
-        self.threshold_label = ctk.CTkLabel(self, text="", font=("HGｺﾞｼｯｸE", 14))
-        # packはon_mode_changeで行う
+        # 4.5 Threshold
+        self.threshold_label = ctk.CTkLabel(self.content_frame, text="", font=("HGｺﾞｼｯｸE", 14, "bold"))
+        
         # 0.60 から 0.95 まで 0.05 刻みのリストを作成
         threshold_values = [f"{x:.2f}" for x in [0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95]]
-        self.threshold_option = ctk.CTkOptionMenu(self, values=threshold_values)
+        self.threshold_option = ctk.CTkOptionMenu(self.content_frame, values=threshold_values, width=200)
         self.threshold_option.set("0.75") # デフォルト値
-        # packはon_mode_changeで行う
 
         # 5. 実行ボタン
-        self.start_button = ctk.CTkButton(self, text="", 
+        self.start_button = ctk.CTkButton(self.content_frame, text="", 
                                          fg_color="green", hover_color="darkgreen",
+                                         height=50, font=("Arial", 16, "bold"),
                                          command=self.button_callback)
-        self.start_button.pack(pady=30)
 
         # 初期表示の言語適用
         self.update_ui_text()
@@ -158,7 +162,13 @@ class App(ctk.CTk):
         """現在の言語設定に基づいてUIのテキストを更新する"""
         t = TRANSLATIONS[self.current_lang]
         
-        self.file_label.configure(text=t["file_label"])
+        # モードに応じてファイルラベルを切り替え
+        current_mode = self.mode_option.get()
+        if current_mode == "create_quiz":
+            self.file_label.configure(text=t["file_label_quiz"])
+        else:
+            self.file_label.configure(text=t["file_label_translate"])
+
         self.file_entry.configure(placeholder_text=t["file_placeholder"])
         self.file_button.configure(text=t["file_btn"])
         self.mode_label.configure(text=t["mode_label"])
@@ -176,6 +186,8 @@ class App(ctk.CTk):
     def on_mode_change(self, mode):
         """モード変更時に不要なUI要素を隠す"""
         # 一旦、可変部分とボタンを画面から外す（非表示にする）
+        self.file_label.pack_forget()
+        self.file_frame.pack_forget()
         self.target_label.pack_forget()
         self.check_question.pack_forget()
         self.check_comment.pack_forget()
@@ -185,21 +197,29 @@ class App(ctk.CTk):
         self.threshold_option.pack_forget()
         self.start_button.pack_forget()
 
+        # ファイル選択が必要なモードの場合のみ表示
+        if mode in ["all", "translate", "create_quiz"]:
+            self.file_label.pack(anchor="w", pady=(20, 5))
+            self.file_frame.pack(fill="x", pady=5)
+
         # 翻訳が必要なモードの場合のみ、設定項目を再配置（表示）する
         if mode in ["all", "translate"]:
-            self.target_label.pack(pady=(20, 5))
-            self.check_question.pack(pady=5)
-            self.check_comment.pack(pady=5)
-            self.limit_label.pack(pady=(20, 5))
-            self.limit_entry.pack(pady=5)
+            self.target_label.pack(anchor="w", pady=(20, 5))
+            self.check_question.pack(anchor="w", pady=5, padx=20)
+            self.check_comment.pack(anchor="w", pady=5, padx=20)
+            self.limit_label.pack(anchor="w", pady=(20, 5))
+            self.limit_entry.pack(anchor="w", pady=5)
         
         # チェックモードの場合のみ、閾値設定を表示
         elif mode == "check":
-            self.threshold_label.pack(pady=(20, 5))
-            self.threshold_option.pack(pady=5)
+            self.threshold_label.pack(anchor="w", pady=(20, 5))
+            self.threshold_option.pack(anchor="w", pady=5)
 
         # ボタンは常に一番下に再配置
-        self.start_button.pack(pady=30)
+        self.start_button.pack(pady=40, fill="x", padx=40)
+        
+        # ラベルテキストの更新（モード切り替えでラベルが変わるため）
+        self.update_ui_text()
 
     def select_file(self):
         """ファイル選択ダイアログを開き、選択されたパスをエントリーに入力する"""
@@ -232,7 +252,7 @@ class App(ctk.CTk):
         if self.check_question.get(): targets.append("question")
         if self.check_comment.get(): targets.append("comment")
 
-        if not input_file and mode in ["all", "translate"]:
+        if not input_file and mode in ["all", "translate", "create_quiz"]:
             messagebox.showerror(t["err_title"], t["msg_error_file"])
             return
 
@@ -248,26 +268,12 @@ class App(ctk.CTk):
         def run_process():
             # 重いライブラリはここでインポート（GUI起動の高速化）
             import Tr_Main as tm
-            from Similarity_Checker import SimilarityChecker
 
             try:
                 if mode == "check":
                     # チェックモード専用の処理
-                    # パスを Tr_Main から取得（一元管理）
-                    paths = tm.get_paths()
-                    target_file = paths["out_file"]
-                    
-                    # 列名のマッピング（エクセルの実際の見出し名と合わせる）
-                    columns = {
-                        '問題文': '問題文', 
-                        'ปัญหา': 'ปัญหา', # ここは実際のエクセルの列名に書き換えてください
-                        '解説': '解説', 
-                        'คำอธิบาย': 'คำอธิบาย' # ここも同様
-                    }
-                    
-                    checker = SimilarityChecker()
-                    checker.check_file(target_file, columns, threshold=threshold_val)
-                    self.after(0, lambda: messagebox.showinfo(t["done_title"], t["msg_check_done"].format(target_file.replace('.xlsx', '_checked.xlsx'))))
+                    out_path = tm.main(mode="check", input_file_path=None, threshold=threshold_val)
+                    self.after(0, lambda: messagebox.showinfo(t["done_title"], t["msg_check_done"].format(out_path)))
                 
                 else:
                     # 既存の翻訳・レイアウト処理

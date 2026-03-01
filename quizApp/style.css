@@ -1,0 +1,158 @@
+/* ベース設定 */
+body {
+  font-family: "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  background-color: #f5f6f7;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+  line-height: 1.6;
+}
+
+/* コンテナ中央寄せ */
+body > * {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* 見出し */
+h1{
+  text-align: center;
+  font-size: 1.75em;
+  color: #222;
+  margin-bottom: 10px;
+}
+
+/* 説明文 */
+p {
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+/* 問題部分 */
+#thai {
+  font-size: 1.2em;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 10px;
+  display: none;
+}
+
+#question {
+  font-size: 0.9em;
+  color: #555;
+  background-color: #fafafa;
+  border-left: 4px solid #ccc;
+  padding: 10px 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  display:none;
+}
+
+#button-group{
+    text-align: center;
+    display:none;
+}
+
+.start_btn_group{
+  display:flex;
+}
+#start_btn{
+    background-color: #5e43e9;
+    color: white;
+}
+
+#backBtn_group{
+  display:none;
+}
+#backBtn{
+  background-color: yellow;
+}
+#next_btn_group{
+  display:none;
+}
+#next_btn{
+  background-color: greenyellow;
+}
+
+/* 中止ボタン */
+#quit_btn_group {
+  text-align: center;
+  margin-top: 200px; /* 他のボタンから離す */
+  display: none;
+}
+
+#quit_btn {
+  background-color: #6c757d; /* グレー */
+  color: white;
+  font-size: 0.9em;
+  width: 150px;
+}
+/* ボタン */
+button {
+  font-size: 1.1em;
+  padding: 10px 25px;
+  margin: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+#trueBtn {
+  background-color: #28a745;
+  color: white;
+}
+
+#falseBtn {
+  background-color: #dc3545;
+  color: white;
+}
+
+button:hover {
+  opacity: 0.9;
+  transform: scale(1.03);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 結果表示 */
+#result {
+    font-weight: bold;
+    font-size: 2em;
+    text-align: center;
+    margin-top: 20px;
+    transition: color 0.2s, text-shadow 0.2s;
+    display:none;
+}
+
+#result.correct {
+    color: #28a745;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+#result.incorrect {
+    color: #dc3545;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  #question {
+    font-size: 1.1em;
+    padding: 15px;
+  }
+
+  button {
+    width: 100%;
+    margin: 8px 0;
+  }
+}
