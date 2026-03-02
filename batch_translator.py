@@ -8,7 +8,7 @@ class Batch_Translator:
         self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name, weights_only=False).to(device)
         self.thai_id = self.tokenizer.convert_tokens_to_ids("tha_Thai")
 
-    def translate_batch(self, texts, penalty=1.2, max_tokens=100):
+    def translate_batch(self, texts, penalty=1.2, max_tokens=100, num_beams=1):
         self.tokenizer.src_lang = "jpn_Jpan"
         inputs = self.tokenizer(texts, return_tensors="pt", padding=True, truncation=True).to(self.device)
         
@@ -17,7 +17,7 @@ class Batch_Translator:
                 **inputs,
                 forced_bos_token_id=self.thai_id,
                 max_new_tokens=max_tokens,
-                num_beams=1,
+                num_beams=num_beams,
                 # ループを物理的に遮断してフリーズを防ぐ（計算は軽い）
                 no_repeat_ngram_size=3,
                 repetition_penalty=penalty,

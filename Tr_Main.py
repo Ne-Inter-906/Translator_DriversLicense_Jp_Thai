@@ -21,7 +21,7 @@ def get_paths():
         "checked_file" : os.path.join(base_dir, "data", "output_checked.xlsx")
     }
 
-def main(mode="all",limit=None,targets=None, input_file_path=None, threshold=0.75):
+def main(mode="all",limit=None,targets=None, input_file_path=None, threshold=0.75, num_beams=1):
     if targets is None:
         targets = ["question"]
     paths = get_paths()
@@ -53,7 +53,7 @@ def main(mode="all",limit=None,targets=None, input_file_path=None, threshold=0.7
         
             current_in = paths["in_file"] if target == targets[0] else paths["out_file"]
             
-            em.execute(current_in, paths["out_file"], batch_size=16, mode=target, limit=limit)
+            em.execute(current_in, paths["out_file"], batch_size=16, mode=target, limit=limit, num_beams=num_beams)
     
     if mode in ["all","layout"]:
         print("整形モード")

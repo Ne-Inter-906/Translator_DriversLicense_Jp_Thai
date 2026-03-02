@@ -23,7 +23,7 @@ class Excel_Manager:
             text = text.replace(str(w), str(r))
         return text
 
-    def execute(self, in_path, out_path, batch_size=16, mode="question", limit=None):
+    def execute(self, in_path, out_path, batch_size=16, mode="question", limit=None, num_beams=1):
 
         # モードによって対象列を定義
         if mode == "question":
@@ -70,12 +70,12 @@ class Excel_Manager:
             
             current_batch_results = []
             try:
-                translated = self.bt.translate_batch(batch_texts)
+                translated = self.bt.translate_batch(batch_texts, num_beams=num_beams)
                 current_batch_results = [self._clean_th(r) for r in translated]
             except Exception as e:
                 print(f"\n[Warning] バッチエラー。個別処理に切り替えます。")
                 for text in batch_texts:
-                    res = self.rt.translate_row(text)
+                    res = self.rt.translate_row(text, num_beams=num_beams)
                     current_batch_results.append(self._clean_th(res))
 
             # 4. 結果を DataFrame に書き戻し、その都度保存

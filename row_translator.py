@@ -26,12 +26,12 @@ class Row_Translator:
             refined_sentences.append(temp_sentence)
         return refined_sentences
 
-    def translate_row(self, text):
+    def translate_row(self, text, num_beams=1):
         if not text.strip():
             return ""
         try:
             # 単一行処理。ループ防止(ngram_size)を入れつつ、少し慎重な設定
-            result = self.bt.translate_batch([text], penalty=1.5, max_tokens=128)
+            result = self.bt.translate_batch([text], penalty=1.5, max_tokens=128, num_beams=num_beams)
             return result[0]
         except Exception as e:
             # 完全に失敗した場合、指定のタイ語を入れて行数を維持する

@@ -18,6 +18,8 @@ TRANSLATIONS = {
         "target_label": "【3】翻訳対象（翻訳モード時のみ）",
         "chk_question": "問題文 (Question)",
         "chk_comment": "解説文 (Comment)",
+        "beams_label": "【3】ビームサーチ数 (1-5)",
+        "beams_tooltip": "ビームサーチは、翻訳の候補を複数保持しながら最適な訳文を探す手法です。\n数値を大きくすると翻訳の精度が向上する可能性がありますが、処理速度は低下します。(デフォルト: 1)",
         "limit_label": "【4】行数制限 (空なら全件)",
         "limit_placeholder": "例: 16",
         "threshold_label": "【3】判定しきい値 (0.0 - 1.0)",
@@ -40,6 +42,8 @@ TRANSLATIONS = {
         "target_label": "【3】เป้าหมายการแปล (Target)",
         "chk_question": "คำถาม (Question)",
         "chk_comment": "คำอธิบาย (Comment)",
+        "beams_label": "【3】จำนวนบีมเซิร์ช (Beam Search 1-5)",
+        "beams_tooltip": "บีมเซิร์ชเป็นเทคนิคในการค้นหาคำแปลที่ดีที่สุดโดยพิจารณาจากตัวเลือกหลายๆ ตัวพร้อมกัน\nการเพิ่มค่าอาจช่วยเพิ่มความแม่นยำในการแปล แต่จะทำให้ความเร็วในการประมวลผลลดลง (ค่าเริ่มต้น: 1)",
         "limit_label": "【4】จำกัดจำนวนบรรทัด (Limit)",
         "limit_placeholder": "ตัวอย่าง: 16",
         "threshold_label": "【3】เกณฑ์ความเหมือน (Threshold 0.0 - 1.0)",
@@ -62,6 +66,8 @@ TRANSLATIONS = {
         "target_label": "[3] Translation Target (Translate Mode Only)",
         "chk_question": "Question",
         "chk_comment": "Comment",
+        "beams_label": "[3] Beam Search Count (1-5)",
+        "beams_tooltip": "Beam search is a technique to find the best translation by keeping several candidates.\nIncreasing the value may improve translation accuracy but will decrease processing speed. (Default: 1)",
         "limit_label": "[4] Limit Rows (Empty for all)",
         "limit_placeholder": "Example: 16",
         "threshold_label": "[3] Similarity Threshold (0.0 - 1.0)",
@@ -76,6 +82,38 @@ TRANSLATIONS = {
         "done_title": "Done"
     }
 }
+
+class Tooltip:
+    """
+    customtkinterウィジェットにツールチップを追加するクラス
+    """
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tip_window = None
+        self.widget.bind("<Enter>", self.show_tip)
+        self.widget.bind("<Leave>", self.hide_tip)
+
+    def show_tip(self, event=None):
+        if self.tip_window or not self.text:
+            return
+        
+        # ウィジェットの座標を取得してツールチップの位置を計算
+        x = self.widget.winfo_rootx() + 20
+        y = self.widget.winfo_rooty() + self.widget.winfo_height() + 5
+        
+        self.tip_window = ctk.CTkToplevel(self.widget)
+        self.tip_window.wm_overrideredirect(True) # ウィンドウ枠を非表示
+        self.tip_window.wm_geometry(f"+{x}+{y}")
+        
+        label = ctk.CTkLabel(self.tip_window, text=self.text, justify='left',
+                             fg_color=("#CCCCCC", "#333333"), text_color=("#333333", "#FFFFFF"), corner_radius=6, wraplength=350)
+        label.pack(ipadx=8, ipady=5)
+
+    def hide_tip(self, event=None):
+        if self.tip_window:
+            self.tip_window.destroy()
+        self.tip_window = None
 
 class App(ctk.CTk):
     def __init__(self):
@@ -93,7 +131,7 @@ class App(ctk.CTk):
         self.lang_option.pack(side="right")
         self.lang_option.set("English")
         
-        self.lang_label = ctk.CTkLabel(self.lang_frame, text="Language:", font=("Arial", 12, "bold"))
+        self.lang_label = ctk.CTkLabel(self.lang_frame, text="UI Language:", font=("Arial", 12, "bold"))
         self.lang_label.pack(side="right", padx=10)
 
         # Main Content Frame
@@ -128,6 +166,12 @@ class App(ctk.CTk):
 
         self.check_comment = ctk.CTkCheckBox(self.content_frame, text="")
 
+        # 3.5 ビームサーチ数
+        self.beams_label = ctk.CTkLabel(self.content_frame, text="", font=("HGｺﾞｼｯｸE", 14, "bold"))
+        self.beams_option = ctk.CTkOptionMenu(self.content_frame, values=["1", "2", "3", "4", "5"], width=200)
+        self.beams_option.set("1") # デフォルト値
+        self.beams_tooltip = Tooltip(self.beams_option, "") # ツールチップをアタッチ
+
         # 4. Limit
         self.limit_label = ctk.CTkLabel(self.content_frame, text="", font=("HGｺﾞｼｯｸE", 14, "bold"))
         
@@ -142,10 +186,11 @@ class App(ctk.CTk):
         self.threshold_option.set("0.75") # デフォルト値
 
         # 5. 実行ボタン
-        self.start_button = ctk.CTkButton(self.content_frame, text="", 
+        self.start_button = ctk.CTkButton(self, text="", 
                                          fg_color="green", hover_color="darkgreen",
                                          height=50, font=("Arial", 16, "bold"),
                                          command=self.button_callback)
+        self.start_button.place(relx=0.5, rely=1.0, y=-30, anchor="s", relwidth=0.85)
 
         # 初期表示の言語適用
         self.update_ui_text()
@@ -175,6 +220,8 @@ class App(ctk.CTk):
         self.target_label.configure(text=t["target_label"])
         self.check_question.configure(text=t["chk_question"])
         self.check_comment.configure(text=t["chk_comment"])
+        self.beams_label.configure(text=t["beams_label"])
+        self.beams_tooltip.text = t["beams_tooltip"] # ツールチップのテキストも更新
         self.limit_label.configure(text=t["limit_label"])
         self.limit_entry.configure(placeholder_text=t["limit_placeholder"])
         self.threshold_label.configure(text=t["threshold_label"])
@@ -191,11 +238,12 @@ class App(ctk.CTk):
         self.target_label.pack_forget()
         self.check_question.pack_forget()
         self.check_comment.pack_forget()
+        self.beams_label.pack_forget()
+        self.beams_option.pack_forget()
         self.limit_label.pack_forget()
         self.limit_entry.pack_forget()
         self.threshold_label.pack_forget()
         self.threshold_option.pack_forget()
-        self.start_button.pack_forget()
 
         # ファイル選択が必要なモードの場合のみ表示
         if mode in ["all", "translate", "create_quiz"]:
@@ -207,6 +255,8 @@ class App(ctk.CTk):
             self.target_label.pack(anchor="w", pady=(20, 5))
             self.check_question.pack(anchor="w", pady=5, padx=20)
             self.check_comment.pack(anchor="w", pady=5, padx=20)
+            self.beams_label.pack(anchor="w", pady=(20, 5))
+            self.beams_option.pack(anchor="w", pady=5)
             self.limit_label.pack(anchor="w", pady=(20, 5))
             self.limit_entry.pack(anchor="w", pady=5)
         
@@ -215,9 +265,6 @@ class App(ctk.CTk):
             self.threshold_label.pack(anchor="w", pady=(20, 5))
             self.threshold_option.pack(anchor="w", pady=5)
 
-        # ボタンは常に一番下に再配置
-        self.start_button.pack(pady=40, fill="x", padx=40)
-        
         # ラベルテキストの更新（モード切り替えでラベルが変わるため）
         self.update_ui_text()
 
@@ -236,6 +283,9 @@ class App(ctk.CTk):
         limit_str = self.limit_entry.get()
         limit = int(limit_str) if limit_str.isdigit() else None
         input_file = self.file_entry.get()
+
+        num_beams_str = self.beams_option.get()
+        num_beams = int(num_beams_str) if num_beams_str.isdigit() else 1
         
         # 閾値の取得（チェックモード用）
         threshold_str = self.threshold_option.get()
@@ -277,7 +327,7 @@ class App(ctk.CTk):
                 
                 else:
                     # 既存の翻訳・レイアウト処理
-                    tm.main(mode=mode, limit=limit, targets=targets, input_file_path=input_file)
+                    tm.main(mode=mode, limit=limit, targets=targets, input_file_path=input_file, num_beams=num_beams)
                     self.after(0, lambda: messagebox.showinfo(t["done_title"], t["msg_done"]))
 
             except Exception as e:
