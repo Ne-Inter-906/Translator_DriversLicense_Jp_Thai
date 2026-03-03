@@ -22,7 +22,7 @@ TRANSLATIONS = {
         "beams_tooltip": "ビームサーチは、翻訳の候補を複数保持しながら最適な訳文を探す手法です。\n数値を大きくすると翻訳の精度が向上する可能性がありますが、処理速度は低下します。(デフォルト: 1)",
         "limit_label": "【4】行数制限 (空なら全件)",
         "limit_placeholder": "例: 16",
-        "threshold_label": "【3】判定しきい値 (0.0 - 1.0)",
+        "threshold_label": "【3】判定しきい値 (0.60 - 0.95)",
         "threshold_placeholder": "例: 0.75 (デフォルト)",
         "start_btn": "実行開始",
         "running": "実行中...",
@@ -46,7 +46,7 @@ TRANSLATIONS = {
         "beams_tooltip": "บีมเซิร์ชเป็นเทคนิคในการค้นหาคำแปลที่ดีที่สุดโดยพิจารณาจากตัวเลือกหลายๆ ตัวพร้อมกัน\nการเพิ่มค่าอาจช่วยเพิ่มความแม่นยำในการแปล แต่จะทำให้ความเร็วในการประมวลผลลดลง (ค่าเริ่มต้น: 1)",
         "limit_label": "【4】จำกัดจำนวนบรรทัด (Limit)",
         "limit_placeholder": "ตัวอย่าง: 16",
-        "threshold_label": "【3】เกณฑ์ความเหมือน (Threshold 0.0 - 1.0)",
+        "threshold_label": "【3】เกณฑ์ความเหมือน (Threshold 0.60 - 0.95)",
         "threshold_placeholder": "ตัวอย่าง: 0.75",
         "start_btn": "เริ่มทำงาน (Start)",
         "running": "กำลังทำงาน... (Running)",
@@ -70,7 +70,7 @@ TRANSLATIONS = {
         "beams_tooltip": "Beam search is a technique to find the best translation by keeping several candidates.\nIncreasing the value may improve translation accuracy but will decrease processing speed. (Default: 1)",
         "limit_label": "[4] Limit Rows (Empty for all)",
         "limit_placeholder": "Example: 16",
-        "threshold_label": "[3] Similarity Threshold (0.0 - 1.0)",
+        "threshold_label": "[3] Similarity Threshold (0.60 - 0.95)",
         "threshold_placeholder": "Example: 0.75",
         "start_btn": "Start Execution",
         "running": "Running...",
@@ -245,8 +245,8 @@ class App(ctk.CTk):
         self.threshold_label.pack_forget()
         self.threshold_option.pack_forget()
 
-        # ファイル選択が必要なモードの場合のみ表示
-        if mode in ["all", "translate", "create_quiz"]:
+        # ファイル選択が必要なモードの場合のみ表示 (layout, check を追加)
+        if mode in ["all", "translate", "create_quiz", "layout", "check"]:
             self.file_label.pack(anchor="w", pady=(20, 5))
             self.file_frame.pack(fill="x", pady=5)
 
@@ -322,7 +322,7 @@ class App(ctk.CTk):
             try:
                 if mode == "check":
                     # チェックモード専用の処理
-                    out_path = tm.main(mode="check", input_file_path=None, threshold=threshold_val)
+                    out_path = tm.main(mode="check", input_file_path=input_file, threshold=threshold_val)
                     self.after(0, lambda: messagebox.showinfo(t["done_title"], t["msg_check_done"].format(out_path)))
                 
                 else:

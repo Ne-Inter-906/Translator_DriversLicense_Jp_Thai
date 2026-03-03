@@ -58,9 +58,11 @@ def main(mode="all",limit=None,targets=None, input_file_path=None, threshold=0.7
     if mode in ["all","layout"]:
         print("整形モード")
         lm = Layout_Manager()
-        template_path = paths["template_file"]
-        lm.sync_layout(template_path,paths["out_file"],paths["out_file"])
         
+        # layoutモードの対象ファイルを決定 (UIから指定があればそれ、なければデフォルト)
+        target_layout_file = input_file_path if input_file_path else paths["out_file"]
+        lm.sync_layout(paths["template_file"], target_layout_file, target_layout_file)
+
     if mode == "check":
         print("チェックモード")
         from Similarity_Checker import SimilarityChecker
