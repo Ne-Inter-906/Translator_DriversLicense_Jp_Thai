@@ -165,6 +165,8 @@ class App(ctk.CTk):
         self.check_question.select() # デフォルトでチェック
 
         self.check_comment = ctk.CTkCheckBox(self.content_frame, text="")
+        self.check_comment.select() # デフォルトでチェック
+
 
         # 3.5 ビームサーチ数
         self.beams_label = ctk.CTkLabel(self.content_frame, text="", font=("HGｺﾞｼｯｸE", 14, "bold"))
