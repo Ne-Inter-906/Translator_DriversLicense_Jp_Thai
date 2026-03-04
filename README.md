@@ -1,7 +1,4 @@
 # Translator_DriversLicense_Jp_Thai
-<img width="1539" height="400" alt="image" src="https://github.com/user-attachments/assets/032b4d35-53e7-4c25-8a71-a1081603130b" />
-<img width="515" height="696" alt="image" src="https://github.com/user-attachments/assets/b4a576de-49a4-4ea9-9bcd-d7832b7dd42f" />
-
 
 #--japanese-------------------------------------------------------------------------------------------------------------------------------
 ## 概要
@@ -171,3 +168,11 @@
 ## check mode
    Checks translation accuracy using LaBSE.
    Cells where the semantic match is below 75% are output in Red text. Manual correction is recommended for these.
+
+#--Images--------------------------------------------------------------------------------------------------------------------------------
+<img width="515" height="696" alt="image" src="https://github.com/user-attachments/assets/b4a576de-49a4-4ea9-9bcd-d7832b7dd42f" />
+<img width="1539" height="400" alt="image" src="https://github.com/user-attachments/assets/032b4d35-53e7-4c25-8a71-a1081603130b" />
+<img width="1431" height="613" alt="image" src="https://github.com/user-attachments/assets/08a00dbf-8f39-4d3d-9895-6b54491a62dc" />
+<img width="1642" height="610" alt="image" src="https://github.com/user-attachments/assets/11052304-c5ad-4d21-9b2f-679888caf047" />
+<img width="738" height="344" alt="image" src="https://github.com/user-attachments/assets/04f646c1-260e-4e22-a75f-8bf00c1cbdb1" />
+<img width="729" height="429" alt="image" src="https://github.com/user-attachments/assets/8933cacc-8acc-4c85-b052-a0606fccbf15" />
