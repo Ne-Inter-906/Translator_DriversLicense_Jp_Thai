@@ -186,4 +186,6 @@ check
 
 create quiz
 <img width="738" height="344" alt="image" src="https://github.com/user-attachments/assets/04f646c1-260e-4e22-a75f-8bf00c1cbdb1" />
-<img width="729" height="429" alt="image" src="https://github.com/user-attachments/assets/8933cacc-8acc-4c85-b052-a0606fccbf15" />
+<img width="775" height="420" alt="image" src="https://github.com/user-attachments/assets/6e10e648-0df3-4afe-9efe-a43d1e525e05" />
+
+
