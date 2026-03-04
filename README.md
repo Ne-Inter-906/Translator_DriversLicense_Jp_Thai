@@ -1,4 +1,7 @@
 # Translator_DriversLicense_Jp_Thai
+<img width="1539" height="400" alt="image" src="https://github.com/user-attachments/assets/032b4d35-53e7-4c25-8a71-a1081603130b" />
+<img width="515" height="696" alt="image" src="https://github.com/user-attachments/assets/b4a576de-49a4-4ea9-9bcd-d7832b7dd42f" />
+
 
 #--japanese-------------------------------------------------------------------------------------------------------------------------------
 ## 概要
