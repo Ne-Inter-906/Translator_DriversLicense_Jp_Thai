@@ -16,6 +16,8 @@ TRANSLATIONS = {
         "file_btn": "ファイル選択",
         "mode_label": "【1】実行モード選択",
         "target_label": "【3】翻訳対象（翻訳モード時のみ）",
+        "speed_mode_chk": "高速化モードを使用 (CPU向け・軽量化)",
+        "speed_mode_tooltip": "CTranslate2を使用して推論を高速化します。\nGPUがない環境でも比較的高速に動作しますが、量子化によりわずかに翻訳精度が変わる場合があります。\n※初回実行時にモデルの変換処理（数分）が必要です。",
         "chk_question": "問題文 (Question)",
         "chk_comment": "解説文 (Comment)",
         "beams_label": "【3】ビームサーチ数 (1-5)",
@@ -29,6 +31,7 @@ TRANSLATIONS = {
         "msg_error_file": "実行するには、入力ファイルを選択してください。",
         "msg_error_target": "翻訳対象を少なくとも1つ選択してください",
         "msg_done": "処理が完了しました。",
+        "msg_confirm_convert": "高速化モードを使用するには、モデルの変換が必要です。\n\n・変換処理には数分かかる場合があります。\n・ディスク容量が数GB必要です。\n\n変換を開始してもよろしいですか？\n(次回以降、この作業は不要です)",
         "msg_check_done": "チェックが完了しました！\n{}",
         "err_title": "エラー",
         "done_title": "完了"
@@ -40,6 +43,8 @@ TRANSLATIONS = {
         "file_btn": "เลือกไฟล์",
         "mode_label": "【1】เลือกโหมด (Select Mode)",
         "target_label": "【3】เป้าหมายการแปล (Target)",
+        "speed_mode_chk": "โหมดความเร็วสูง (Fast Mode / CPU)",
+        "speed_mode_tooltip": "ใช้ CTranslate2 เพื่อเพิ่มความเร็ว โดยเฉพาะบน CPU",
         "chk_question": "คำถาม (Question)",
         "chk_comment": "คำอธิบาย (Comment)",
         "beams_label": "【3】จำนวนบีมเซิร์ช (Beam Search 1-5)",
@@ -53,6 +58,7 @@ TRANSLATIONS = {
         "msg_error_file": "กรุณาเลือกไฟล์นำเข้าเพื่อเริ่มทำงาน",
         "msg_error_target": "กรุณาเลือกเป้าหมายการแปลอย่างน้อย 1 รายการ",
         "msg_done": "การทำงานเสร็จสมบูรณ์",
+        "msg_confirm_convert": "ต้องทำการแปลงโมเดลก่อนใช้งานโหมดความเร็วสูง\nต้องการดำเนินการต่อหรือไม่?",
         "msg_check_done": "การตรวจสอบเสร็จสมบูรณ์!\n{}",
         "err_title": "ข้อผิดพลาด (Error)",
         "done_title": "เสร็จสิ้น (Done)"
@@ -64,6 +70,8 @@ TRANSLATIONS = {
         "file_btn": "Select File",
         "mode_label": "[1] Select Mode",
         "target_label": "[3] Translation Target (Translate Mode Only)",
+        "speed_mode_chk": "Use Fast Mode (CPU/Quantized)",
+        "speed_mode_tooltip": "Uses CTranslate2 for faster inference on CPU.\nRequires model conversion on first run.",
         "chk_question": "Question",
         "chk_comment": "Comment",
         "beams_label": "[3] Beam Search Count (1-5)",
@@ -77,6 +85,7 @@ TRANSLATIONS = {
         "msg_error_file": "Please select an input file to run.",
         "msg_error_target": "Please select at least one translation target.",
         "msg_done": "Process completed.",
+        "msg_confirm_convert": "Model conversion is required for Fast Mode.\nProceed? (Takes a few minutes once)",
         "msg_check_done": "Check completed!\n{}",
         "err_title": "Error",
         "done_title": "Done"
@@ -167,6 +176,10 @@ class App(ctk.CTk):
         self.check_comment = ctk.CTkCheckBox(self.content_frame, text="")
         self.check_comment.select() # デフォルトでチェック
 
+        # 3.2 高速化モード (CTranslate2)
+        self.check_speed = ctk.CTkCheckBox(self.content_frame, text="")
+        self.speed_tooltip = Tooltip(self.check_speed, "")
+
 
         # 3.5 ビームサーチ数
         self.beams_label = ctk.CTkLabel(self.content_frame, text="", font=("HGｺﾞｼｯｸE", 14, "bold"))
@@ -222,6 +235,8 @@ class App(ctk.CTk):
         self.target_label.configure(text=t["target_label"])
         self.check_question.configure(text=t["chk_question"])
         self.check_comment.configure(text=t["chk_comment"])
+        self.check_speed.configure(text=t["speed_mode_chk"])
+        self.speed_tooltip.text = t["speed_mode_tooltip"]
         self.beams_label.configure(text=t["beams_label"])
         self.beams_tooltip.text = t["beams_tooltip"] # ツールチップのテキストも更新
         self.limit_label.configure(text=t["limit_label"])
@@ -240,6 +255,7 @@ class App(ctk.CTk):
         self.target_label.pack_forget()
         self.check_question.pack_forget()
         self.check_comment.pack_forget()
+        self.check_speed.pack_forget()
         self.beams_label.pack_forget()
         self.beams_option.pack_forget()
         self.limit_label.pack_forget()
@@ -257,6 +273,7 @@ class App(ctk.CTk):
             self.target_label.pack(anchor="w", pady=(20, 5))
             self.check_question.pack(anchor="w", pady=5, padx=20)
             self.check_comment.pack(anchor="w", pady=5, padx=20)
+            self.check_speed.pack(anchor="w", pady=(10, 5), padx=20)
             self.beams_label.pack(anchor="w", pady=(20, 5))
             self.beams_option.pack(anchor="w", pady=5)
             self.limit_label.pack(anchor="w", pady=(20, 5))
@@ -298,11 +315,14 @@ class App(ctk.CTk):
         
         # 現在の言語の辞書を取得
         t = TRANSLATIONS[self.current_lang]
+
+        # GUI値の取得
+        use_speed_mode = self.check_speed.get() == 1
         
         # 翻訳対象リストの作成
         targets = []
-        if self.check_question.get(): targets.append("question")
-        if self.check_comment.get(): targets.append("comment")
+        if self.check_question.get() == 1: targets.append("question")
+        if self.check_comment.get() == 1: targets.append("comment")
 
         if not input_file and mode in ["all", "translate", "create_quiz"]:
             messagebox.showerror(t["err_title"], t["msg_error_file"])
@@ -311,6 +331,22 @@ class App(ctk.CTk):
         if not targets and mode in ["all", "translate"]:
             messagebox.showerror(t["err_title"], t["msg_error_target"])
             return
+
+        # 高速化モード時の初回確認
+        if mode in ["all", "translate"] and use_speed_mode:
+            import os
+            from Tr_Main import get_paths
+            
+            # モデルパスの確認
+            paths = get_paths()
+            ct2_dir = paths.get("ct2_model")
+            
+            # フォルダが存在しない、または空の場合
+            if not ct2_dir or not os.path.exists(ct2_dir) or not os.listdir(ct2_dir):
+                confirm = messagebox.askyesno("Confirm Setup", t["msg_confirm_convert"])
+                if not confirm:
+                    print("User cancelled CT2 setup.")
+                    return
 
         print(f"--- 実行: {mode} (Target: {targets}, Limit: {limit}) ---")
         # ボタンを無効化（連打防止）
@@ -329,7 +365,7 @@ class App(ctk.CTk):
                 
                 else:
                     # 既存の翻訳・レイアウト処理
-                    tm.main(mode=mode, limit=limit, targets=targets, input_file_path=input_file, num_beams=num_beams)
+                    tm.main(mode=mode, limit=limit, targets=targets, input_file_path=input_file, num_beams=num_beams, use_ct2=use_speed_mode)
                     self.after(0, lambda: messagebox.showinfo(t["done_title"], t["msg_done"]))
 
             except Exception as e:

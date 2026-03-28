@@ -18,10 +18,11 @@ def get_paths():
         "out_file": os.path.join(base_dir, "data", "output.xlsx"),
         "template_file": os.path.join(base_dir, "templates", "Driver'sLisence_MockTest.xlsx"),
         "json_file": os.path.join(base_dir, "quizApp","questions.js"),
-        "checked_file" : os.path.join(base_dir, "data", "output_checked.xlsx")
+        "checked_file" : os.path.join(base_dir, "data", "output_checked.xlsx"),
+        "ct2_model": os.path.join(base_dir, "ct2_nllb_model") # CTranslate2用モデルディレクトリ
     }
 
-def main(mode="all",limit=None,targets=None, input_file_path=None, threshold=0.75, num_beams=1):
+def main(mode="all",limit=None,targets=None, input_file_path=None, threshold=0.75, num_beams=1, use_ct2=False):
     if targets is None:
         targets = ["question"]
     paths = get_paths()
@@ -45,7 +46,7 @@ def main(mode="all",limit=None,targets=None, input_file_path=None, threshold=0.7
         from row_translator import Row_Translator
         from excel_manager import Excel_Manager
 
-        bt = Batch_Translator()
+        bt = Batch_Translator(use_ct2=use_ct2, ct2_dir=paths["ct2_model"])
         rt = Row_Translator(bt)
         em = Excel_Manager(paths["jp_csv"], paths["th_csv"], bt, rt)
 
