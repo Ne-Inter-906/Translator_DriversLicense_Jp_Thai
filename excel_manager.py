@@ -43,7 +43,7 @@ class Excel_Manager:
         while df.shape[1] <= dst_idx:
             df[f"temp_{df.shape[1]}"] = "" 
         
-        df.iloc[:, dst_idx] = df.iloc[:, dst_idx].fillna("").astype(object)
+        df.iloc[:, dst_idx] = df.iloc[:, dst_idx].astype(object).fillna("")
 
         # 2. 翻訳が必要な行のインデックスを抽出
         fail_msg = "การแปลล้มเหลว" # 翻訳に失敗しました、の意味
