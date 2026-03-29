@@ -3,9 +3,11 @@ customtkinter
 
 # Excel操作
 pandas
+sentence-transformers
 openpyxl
 
 # 翻訳 (NLLB) & AIモデル用
+torch
 transformers
 sentence-transformers
 torch
@@ -13,3 +15,5 @@ sentencepiece
 
 # その他（計算・環境管理など）
 numpy
+customtkinter
+Pillow

@@ -16,6 +16,7 @@ TRANSLATIONS = {
         "file_btn": "ファイル選択",
         "mode_label": "【1】実行モード選択",
         "target_label": "【3】翻訳対象（翻訳モード時のみ）",
+        "target_lang_sel_label": "【1.5】翻訳先言語 (Target Language)",
         "speed_mode_chk": "高速化モードを使用 (CPU向け・軽量化)",
         "speed_mode_tooltip": "CTranslate2を使用して推論を高速化します。\nGPUがない環境でも比較的高速に動作しますが、量子化によりわずかに翻訳精度が変わる場合があります。\n※初回実行時にモデルの変換処理（数分）が必要です。",
         "chk_question": "問題文 (Question)",
@@ -43,6 +44,7 @@ TRANSLATIONS = {
         "file_btn": "เลือกไฟล์",
         "mode_label": "【1】เลือกโหมด (Select Mode)",
         "target_label": "【3】เป้าหมายการแปล (Target)",
+        "target_lang_sel_label": "【1.5】ภาษาปลายทาง (Target Language)",
         "speed_mode_chk": "โหมดความเร็วสูง (Fast Mode / CPU)",
         "speed_mode_tooltip": "ใช้ CTranslate2 เพื่อเพิ่มความเร็ว โดยเฉพาะบน CPU",
         "chk_question": "คำถาม (Question)",
@@ -70,6 +72,7 @@ TRANSLATIONS = {
         "file_btn": "Select File",
         "mode_label": "[1] Select Mode",
         "target_label": "[3] Translation Target (Translate Mode Only)",
+        "target_lang_sel_label": "[1.5] Target Language",
         "speed_mode_chk": "Use Fast Mode (CPU/Quantized)",
         "speed_mode_tooltip": "Uses CTranslate2 for faster inference on CPU.\nRequires model conversion on first run.",
         "chk_question": "Question",
@@ -129,7 +132,7 @@ class App(ctk.CTk):
         super().__init__()
 
         self.title("Auto Translator GUI v1.1")
-        self.geometry("500x650")
+        self.geometry("500x800")
         self.current_lang = "English" # デフォルト言語
 
         # 0. 言語選択 (Top Right)
@@ -153,6 +156,12 @@ class App(ctk.CTk):
         
         self.mode_option = ctk.CTkOptionMenu(self.content_frame, values=["all", "translate", "layout", "check", "create_quiz"], command=self.on_mode_change, width=200)
         self.mode_option.pack(anchor="w", pady=5)
+
+        # 1.5 翻訳先言語選択
+        self.target_lang_sel_label = ctk.CTkLabel(self.content_frame, text="", font=("HGｺﾞｼｯｸE", 14, "bold"))
+        self.target_lang_sel_option = ctk.CTkOptionMenu(self.content_frame, 
+                                                       values=["Thai", "Lao", "Khmer", "Vietnamese", "Chinese", "Korean", "Tagalog", "Indonesian", "Myanmar", "English"], width=200)
+        self.target_lang_sel_option.set("Thai")
 
         # 2. 入力ファイル選択
         self.file_label = ctk.CTkLabel(self.content_frame, text="", font=("HGｺﾞｼｯｸE", 16, "bold"))
@@ -233,6 +242,7 @@ class App(ctk.CTk):
         self.file_button.configure(text=t["file_btn"])
         self.mode_label.configure(text=t["mode_label"])
         self.target_label.configure(text=t["target_label"])
+        self.target_lang_sel_label.configure(text=t["target_lang_sel_label"])
         self.check_question.configure(text=t["chk_question"])
         self.check_comment.configure(text=t["chk_comment"])
         self.check_speed.configure(text=t["speed_mode_chk"])
@@ -251,6 +261,8 @@ class App(ctk.CTk):
         """モード変更時に不要なUI要素を隠す"""
         # 一旦、可変部分とボタンを画面から外す（非表示にする）
         self.file_label.pack_forget()
+        self.target_lang_sel_label.pack_forget()
+        self.target_lang_sel_option.pack_forget()
         self.file_frame.pack_forget()
         self.target_label.pack_forget()
         self.check_question.pack_forget()
@@ -270,6 +282,8 @@ class App(ctk.CTk):
 
         # 翻訳が必要なモードの場合のみ、設定項目を再配置（表示）する
         if mode in ["all", "translate"]:
+            self.target_lang_sel_label.pack(anchor="w", pady=(20, 5))
+            self.target_lang_sel_option.pack(anchor="w", pady=5)
             self.target_label.pack(anchor="w", pady=(20, 5))
             self.check_question.pack(anchor="w", pady=5, padx=20)
             self.check_comment.pack(anchor="w", pady=5, padx=20)
@@ -301,6 +315,7 @@ class App(ctk.CTk):
         mode = self.mode_option.get()
         limit_str = self.limit_entry.get()
         limit = int(limit_str) if limit_str.isdigit() else None
+        target_lang = self.target_lang_sel_option.get()
         input_file = self.file_entry.get()
 
         num_beams_str = self.beams_option.get()
@@ -365,7 +380,7 @@ class App(ctk.CTk):
                 
                 else:
                     # 既存の翻訳・レイアウト処理
-                    tm.main(mode=mode, limit=limit, targets=targets, input_file_path=input_file, num_beams=num_beams, use_ct2=use_speed_mode)
+                    tm.main(mode=mode, limit=limit, targets=targets, input_file_path=input_file, num_beams=num_beams, use_ct2=use_speed_mode, target_lang=target_lang)
                     self.after(0, lambda: messagebox.showinfo(t["done_title"], t["msg_done"]))
 
             except Exception as e:

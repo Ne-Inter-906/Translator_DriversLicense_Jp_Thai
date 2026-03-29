@@ -1,15 +1,25 @@
 import pandas as pd
 import unicodedata
+import os
 
 class Excel_Manager:
-    def __init__(self, jp_csv, th_csv, batch_translator, row_translator):
+    def __init__(self, jp_csv, tgt_lang_name, batch_translator, row_translator):
         self.bt = batch_translator
         self.rt = row_translator
+        self.tgt_lang_name = tgt_lang_name
         jp_df = pd.read_csv(jp_csv)
         self.jp_dict = dict(zip(jp_df["before"], jp_df["after"]))
-        th_df = pd.read_csv(th_csv, encoding="utf-8-sig")
-        th_dict_df = th_df.fillna("")
-        self.th_dict = dict(zip(th_dict_df["wrong"], th_dict_df["right"]))
+
+        # 翻訳後クリーンアップ辞書の読み込み（言語ごとに存在すれば読み込む）
+        config_dir = os.path.dirname(jp_csv)
+        tgt_csv = os.path.join(config_dir, f"{tgt_lang_name.lower()}_norm.csv")
+        
+        if os.path.exists(tgt_csv):
+            th_df = pd.read_csv(tgt_csv, encoding="utf-8-sig")
+            th_dict_df = th_df.fillna("")
+            self.tgt_dict = dict(zip(th_dict_df["wrong"], th_dict_df["right"]))
+        else:
+            self.tgt_dict = {}
 
     def _clean_ja(self, text):
         text = unicodedata.normalize("NFKC", str(text))
@@ -17,9 +27,9 @@ class Excel_Manager:
             text = text.replace(b, a)
         return text
 
-    def _clean_th(self, text):
+    def _clean_tgt(self, text):
         text = unicodedata.normalize("NFKC", text)
-        for w, r in sorted(self.th_dict.items(), key=lambda x: len(x[0]), reverse=True):
+        for w, r in sorted(self.tgt_dict.items(), key=lambda x: len(x[0]), reverse=True):
             text = text.replace(str(w), str(r))
         return text
 
@@ -46,7 +56,11 @@ class Excel_Manager:
         df.iloc[:, dst_idx] = df.iloc[:, dst_idx].astype(object).fillna("")
 
         # 2. 翻訳が必要な行のインデックスを抽出
-        fail_msg = "การแปลล้มเหลว" # 翻訳に失敗しました、の意味
+        # 言語がタイ語の場合は既存のメッセージ、それ以外は汎用的な英語にする
+        if self.tgt_lang_name == "Thai":
+            fail_msg = "การแปลล้มเหลว"
+        else:
+            fail_msg = "Translation Failed"
         
         targets = []
         for idx, row in df.iterrows():
@@ -71,12 +85,12 @@ class Excel_Manager:
             current_batch_results = []
             try:
                 translated = self.bt.translate_batch(batch_texts, num_beams=num_beams)
-                current_batch_results = [self._clean_th(r) for r in translated]
+                current_batch_results = [self._clean_tgt(r) for r in translated]
             except Exception as e:
                 print(f"\n[Warning] バッチエラー。個別処理に切り替えます。")
                 for text in batch_texts:
                     res = self.rt.translate_row(text, num_beams=num_beams)
-                    current_batch_results.append(self._clean_th(res))
+                    current_batch_results.append(self._clean_tgt(res))
 
             # 4. 結果を DataFrame に書き戻し、その都度保存
             for idx, res in zip(batch_indices, current_batch_results):

@@ -10,11 +10,12 @@ except ImportError:
     ctranslate2 = None
 
 class Batch_Translator:
-    def __init__(self, model_name="facebook/nllb-200-3.3B", device="cuda", use_ct2=False, ct2_dir="ct2_model"):
+    def __init__(self, model_name="facebook/nllb-200-3.3B", device="cuda", use_ct2=False, ct2_dir="ct2_model", tgt_lang="tha_Thai"):
         self.use_ct2 = use_ct2
         self.ct2_dir = ct2_dir
         self.device = device
         self.model_name = model_name
+        self.tgt_lang = tgt_lang
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         
         if self.use_ct2:
@@ -38,7 +39,7 @@ class Batch_Translator:
         else:
             # 既存のPyTorchモード
             self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name, weights_only=False).to(device)
-            self.thai_id = self.tokenizer.convert_tokens_to_ids("tha_Thai")
+            self.tgt_lang_id = self.tokenizer.convert_tokens_to_ids(self.tgt_lang)
 
     def translate_batch(self, texts, penalty=1.2, max_tokens=100, num_beams=1):
         if self.use_ct2:
@@ -53,7 +54,7 @@ class Batch_Translator:
         with torch.no_grad():
             tokens = self.model.generate(
                 **inputs,
-                forced_bos_token_id=self.thai_id,
+                forced_bos_token_id=self.tgt_lang_id,
                 max_new_tokens=max_tokens,
                 num_beams=num_beams,
                 # ループを物理的に遮断してフリーズを防ぐ（計算は軽い）
@@ -73,7 +74,7 @@ class Batch_Translator:
 
         # 2. Translate
         # NLLB等はターゲット言語トークンをprefixとして渡す必要があります
-        target_prefix = [["tha_Thai"]] * len(source)
+        target_prefix = [[self.tgt_lang]] * len(source)
         
         results = self.ct2_translator.translate_batch(
             source,

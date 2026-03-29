@@ -3,6 +3,20 @@ import sys
 from Layout_Manager import Layout_Manager
 from quiz_creator import Quiz_Creator
 
+# NLLB言語コードのマッピング
+TARGET_LANG_MAP = {
+    "Thai": "tha_Thai",
+    "Lao": "lao_Lao",
+    "Khmer": "khm_Khmr",
+    "Vietnamese": "vie_Latn",
+    "Chinese": "zho_Hans",
+    "Korean": "kor_Hang",
+    "Tagalog": "tgl_Latn",
+    "Indonesian": "ind_Latn",
+    "Myanmar": "mya_Mymr",
+    "English": "eng_Latn"
+}
+
 def get_paths():
     # ディレクトリパスを取得
     if getattr(sys, 'frozen', False):
@@ -22,7 +36,7 @@ def get_paths():
         "ct2_model": os.path.join(base_dir, "ct2_nllb_model") # CTranslate2用モデルディレクトリ
     }
 
-def main(mode="all",limit=None,targets=None, input_file_path=None, threshold=0.75, num_beams=1, use_ct2=False):
+def main(mode="all",limit=None,targets=None, input_file_path=None, threshold=0.75, num_beams=1, use_ct2=False, target_lang="Thai"):
     if targets is None:
         targets = ["question"]
     paths = get_paths()
@@ -46,9 +60,11 @@ def main(mode="all",limit=None,targets=None, input_file_path=None, threshold=0.7
         from row_translator import Row_Translator
         from excel_manager import Excel_Manager
 
-        bt = Batch_Translator(use_ct2=use_ct2, ct2_dir=paths["ct2_model"])
+        tgt_nllb_code = TARGET_LANG_MAP.get(target_lang, "tha_Thai")
+
+        bt = Batch_Translator(use_ct2=use_ct2, ct2_dir=paths["ct2_model"], tgt_lang=tgt_nllb_code)
         rt = Row_Translator(bt)
-        em = Excel_Manager(paths["jp_csv"], paths["th_csv"], bt, rt)
+        em = Excel_Manager(paths["jp_csv"], target_lang, bt, rt)
 
         for target in targets:
         
