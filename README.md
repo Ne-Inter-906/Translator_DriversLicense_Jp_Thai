@@ -39,10 +39,9 @@
    Tr_Gui.pyから実行します
 
 ## translate mode
-   AI(METAのNLLB)で日本語からタイ語へ翻訳を行います
-   翻訳したいデータを以下の構成で配置してください。
-
-      配置先: ファイル選択ボタンを押して自身で用意したExcelファイルを選んでください。
+   AI(METAのNLLB)で日本語から翻訳したい外国語へ翻訳を行います
+   
+     ファイル選択ボタンを押して自身で用意したExcelファイルを選んでください。
       注：（ファイルの内容はtemplates/Driver'sLicense_MockTest.xlsx と同じセル構成にしてください。
             構成が変わっていると正常に動作しません。）
 
@@ -57,7 +56,7 @@
 
 　　
 ## layout mode
-  temlates\Driver'sLisence_MockTest.xslx
+  templates\Driver'sLisence_MockTest.xslx
 　と同じレイアウトになるように調整します、翻訳実行後はすべてのレイアウトが解除されているので、これを実行して整えます
 　プルダウンメニューでallを選んだ場合は翻訳とレイアウト調整をセットで実行します。
 
@@ -156,7 +155,7 @@
    Run Tr_Gui.py
 
 ## translate mode
-   Translates from Japanese to Thai using AI (Meta's NLLB).
+   Translates from Japanese to foreign language using AI (Meta's NLLB).
    Please arrange the data you want to translate in the following configuration:
       Location: Click the file selection button to choose your prepared Excel file.
       Column B: Question (Japanese)
